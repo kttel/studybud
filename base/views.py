@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -65,7 +65,9 @@ def home(request):
         Q(name__icontains=q) |
         Q(description__icontains=q)
     )
-    topics = models.Topic.objects.all()
+    topics = models.Topic.objects.all() \
+        .annotate(num_rooms=Count('room')) \
+        .order_by('-num_rooms')[:3]
     room_count = rooms.count()
     room_messages = models.Message.objects.filter(
         Q(room__name__icontains=q) |
@@ -174,3 +176,26 @@ def delete_message(request, pk):
         return redirect('room', pk=room_id)
 
     return render(request, 'base/delete.html', context)
+
+
+@login_required(login_url='/login')
+def edit_user(request):
+    form = forms.UserForm(instance=request.user)
+    context = {'form': form}
+    if request.method == 'POST':
+        form = forms.UserForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('user-profile', pk=request.user.pk)
+    return render(request, 'base/edit-user.html', context)
+
+
+def topics_page(request):
+    topics = models.Topic.objects.filter(name__icontains=request.GET.get('q', ''))
+    context = {'topics': topics}
+    return render(request, 'base/topics.html', context)
+
+def activity_page(request):
+    room_messages = models.Message.objects.all()[:3]
+    context = {'room_messages': room_messages}
+    return render(request, 'base/activity.html', context)
