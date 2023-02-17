@@ -1,11 +1,10 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.db.models import Q, Count
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm
 
 from base import models, forms
 
@@ -17,21 +16,21 @@ def login_page(request):
         return redirect('home')
 
     if request.method == 'POST':
-        username = request.POST.get('username').lower()
+        email = request.POST.get('email')
         password = request.POST.get('password')
 
         try:
-            user = User.objects.get(username=username)
+            user = get_user_model().objects.get(email=email)
         except:
             messages.error(request, 'User does not exist')
 
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(request, username=email, password=password)
 
         if user is not None:
             login(request, user)
             return redirect('home')
 
-        messages.error(request, 'Username or password does not exist')
+        messages.error(request, 'Email or password does not exist')
 
     context = {'page': page}
     return render(request, 'base/login_register.html', context)
@@ -44,9 +43,9 @@ def logout_user(request):
 
 def register_user(request):
     page = 'register'
-    form = UserCreationForm()
+    form = forms.UserRegisterForm()
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = forms.UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.username = user.username.lower()
@@ -99,7 +98,7 @@ def room(request, pk):
 
 @login_required(login_url='/login')
 def user_profile(request, pk):
-    user = User.objects.get(pk=pk)
+    user = get_user_model().objects.get(pk=pk)
     rooms = user.room_set.all()
     room_messages = user.message_set.all()
     topics = models.Topic.objects.all()
@@ -183,7 +182,7 @@ def edit_user(request):
     form = forms.UserForm(instance=request.user)
     context = {'form': form}
     if request.method == 'POST':
-        form = forms.UserForm(request.POST, instance=request.user)
+        form = forms.UserForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
             return redirect('user-profile', pk=request.user.pk)
