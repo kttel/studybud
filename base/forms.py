@@ -1,8 +1,8 @@
-from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-
-from base import models
+from django.contrib.auth.forms import (
+    UserCreationForm,
+    AuthenticationForm
+)
 
 
 class UserLoginForm(AuthenticationForm):
@@ -21,16 +21,3 @@ class UserRegisterForm(UserCreationForm):
             'name', 'username', 'email',
             'password1', 'password2'
         ]
-
-
-class RoomForm(forms.ModelForm):
-    class Meta:
-        model = models.Room
-        fields = '__all__'
-        exclude = ['host', 'topic', 'participants']
-
-
-class UserForm(forms.ModelForm):
-    class Meta:
-        model = get_user_model()
-        fields = ['username', 'email', 'avatar', 'bio']

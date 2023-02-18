@@ -3,11 +3,7 @@
 {% block content %}
   <main class="layout layout--3">
     <div class="container">
-      <!-- Topics Start -->
-      {% include 'base/topics_component.html' %}
-      <!-- Topics End -->
-
-      <!-- Room List Start -->
+      {% include 'components/topics.html' %}
       <div class="roomList">
         <div class="mobile-menu">
           <form class="header__search">
@@ -41,13 +37,9 @@
             Create Room
           </a>
         </div>
-        {% include 'base/feed_component.html' %}
+        {% include 'components/feed.html' %}
       </div>
-      <!-- Room List End -->
-
-      <!-- Activities Start -->
-      {% include 'base/activity_component.html' %}
-      <!-- Activities End -->
+      {% include 'components/activity.html' %}
     </div>
   </main>
 {% endblock %}
