@@ -7,7 +7,7 @@
         <div class="room">
           <div class="room__top">
             <div class="room__topLeft">
-              <a href="index.html">
+              <a href="{% url 'home' %}">
                 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
                   <title>arrow-left</title>
                   <path
@@ -92,7 +92,7 @@
                       <span class="thread__date">{{ message.created|timesince }} ago</span>
                     </div>
                     {% if request.user == message.user %}
-                    <a href="{% url 'delete-message' message.id %}">
+                    <a href="{% url 'delete-message' room.id message.id %}">
                       <div class="thread__delete">
                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
                           <title>remove</title>
@@ -112,12 +112,14 @@
               </div>
             </div>
           </div>
+          {% if request.user.is_authenticated %}
           <div class="room__message">
-            <form method="POST">
+            <form method="POST" action="{% url 'room-message' room.pk %}">
               {% csrf_token %}
               <input name="body" placeholder="Write your message here..." />
             </form>
           </div>
+          {% endif %}
         </div>
         <!-- Room End -->
 

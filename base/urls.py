@@ -1,19 +1,40 @@
-from django.urls import path
+from django.urls import path, reverse_lazy
+from django.contrib.auth.views import LogoutView
 
 from base import views
 
+# apps: rooms, users, main
 urlpatterns = [
-    path('login/', views.login_page, name='login'),
-    path('logout/', views.logout_user, name='logout'),
-    path('register/', views.register_user, name='register'),
-    path('', views.home, name='home'),
-    path('room/<str:pk>/', views.room, name='room'),
-    path('profile/<str:pk>/', views.user_profile, name='user-profile'),
-    path('create-room/',  views.create_room, name='create-room'),
-    path('update-room/<str:pk>/',  views.update_room, name='update-room'),
-    path('delete-room/<str:pk>/',  views.delete_room, name='delete-room'),
-    path('delete-message/<str:pk>/',  views.delete_message, name='delete-message'),
-    path('edit-user/', views.edit_user, name='edit-user'),
-    path('topics/', views.topics_page, name='topics'),
-    path('activity/', views.activity_page, name='activity'),
+    path('login/', views.LoginUserView.as_view(), name='login'),
+    path('logout/',
+         LogoutView.as_view(next_page=reverse_lazy('home')),
+         name='logout'),
+    path('register/',
+         views.RegisterUserView.as_view(), name='register'),
+
+    # users
+    path('profile/<str:pk>/',
+         views.ProfileView.as_view(),
+         name='user-profile'),
+    path('edit-user/',
+         views.UpdateProfileView.as_view(), name='edit-user'),
+
+    # main
+    path('', views.HomeView.as_view(), name='home'),
+    path('topics/', views.TopicsView.as_view(), name='topics'),
+    path('activity/', views.ActivityView.as_view(), name='activity'),
+
+    # rooms
+    path('room/<str:pk>/', views.RoomDetailView.as_view(), name='room'),
+    path('room/<str:pk>/message/',
+         views.MessageView.as_view(),
+         name='room-message'),
+    path('room/<str:pk_room>/delete-message/<str:pk>/',
+         views.DeleteMessageView.as_view(),
+         name='delete-message'),
+    path('create-room/',  views.CreateRoomView.as_view(), name='create-room'),
+    path('update-room/<str:pk>/',
+         views.UpdateRoomView.as_view(), name='update-room'),
+    path('room/<str:pk>/delete/',
+         views.DeleteRoomView.as_view(), name='delete-room'),
 ]
