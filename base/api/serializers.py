@@ -12,12 +12,18 @@ class ParticipantsSerializer(ModelSerializer):
 
 
 class RoomSerializer(ModelSerializer):
-    participants = ParticipantsSerializer(many=True)
+    participants = ParticipantsSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Room
-        fields = ['name', 'description', 'host', 'participants']
+        fields = ['id', 'name', 'description', 'host', 'participants']
+        read_only_fields = ['host']
 
+    def create(self, validated_data):
+        room = models.Room.objects.create(**validated_data)
+        room.host = self.context.get('request').user
+        room.save()
+        return room
 
 class UserSerializer(ModelSerializer):
     room_set = RoomSerializer(many=True, read_only=True)
